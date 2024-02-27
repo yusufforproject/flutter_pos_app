@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pos_app/presentation/home/bloc/product/product_bloc.dart';
 
 import '../../../core/assets/assets.gen.dart';
 import '../../../core/components/menu_button.dart';
@@ -56,27 +58,34 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    searchResults = products;
+    context.read<ProductBloc>().add(const ProductEvent.fetchLocal());
+    // searchResults = products;
     super.initState();
   }
 
   void onCategoryTap(int index) {
     searchController.clear();
     indexValue.value = index;
-    if (index == 0) {
-      searchResults = products;
-    } else {
-      searchResults = products
-          .where((e) => e.category.index.toString().contains(index.toString()))
-          .toList();
+    String category = 'all';
+    switch (index) {
+      case 0:
+        category = 'all';
+        break;
+      case 1:
+        category = 'drink';
+        break;
+      case 2:
+        category = 'food';
+        break;
+      case 3:
+        category = 'snack';
+        break;
     }
-    setState(() {});
+    context.read<ProductBloc>().add(ProductEvent.fetchByCategory(category));
   }
+
   @override
   Widget build(BuildContext context) {
-    if (products.isEmpty) {
-      return const ProductEmpty();
-    }
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -94,12 +103,12 @@ class _HomePageState extends State<HomePage> {
             SearchInput(
               controller: searchController,
               onChanged: (value) {
-                indexValue.value = 0;
-                searchResults = products
-                    .where((e) =>
-                        e.name.toLowerCase().contains(value.toLowerCase()))
-                    .toList();
-                setState(() {});
+                // indexValue.value = 0;
+                // searchResults = products
+                //     .where((e) =>
+                //         e.name.toLowerCase().contains(value.toLowerCase()))
+                //     .toList();
+                // setState(() {});
               },
             ),
             const SpaceHeight(20.0),
@@ -138,27 +147,39 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SpaceHeight(35.0),
-            if (searchResults.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 80.0),
-                child: ProductEmpty(),
-              )
-            else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: searchResults.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: 0.65,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 30.0,
-                  mainAxisSpacing: 30.0,
-                ),
-                itemBuilder: (context, index) => ProductCard(
-                  data: searchResults[index],
-                  onCartButton: () {},
-                ),
-              ),
+            BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                return state.maybeWhen(
+                  orElse: () {
+                    return const SizedBox();
+                  },
+                  loading: () {
+                    return const Center(child: CircularProgressIndicator(),);  
+                  },
+                  error: (message) {
+                    return Center(child: Text(message),);
+                  },
+                  success: (products) {
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: products.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        childAspectRatio: 0.65,
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 30.0,
+                        mainAxisSpacing: 30.0,
+                      ),
+                      itemBuilder: (context, index) => ProductCard(
+                        data: products[index],
+                        onCartButton: () {},
+                      ),
+                    );
+                  }
+                );
+                
+              },
+            ),
             const SpaceHeight(30.0),
           ],
         ),

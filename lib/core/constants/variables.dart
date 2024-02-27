@@ -1,3 +1,4 @@
 class Variables {
-  static const baseUrl = 'http://10.0.2.2:8000';
+  static const baseUrl = 'http://192.168.33.56:8000';
+  static const imgBaseUrl = '$baseUrl/storage/products/';
 }

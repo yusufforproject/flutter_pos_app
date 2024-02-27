@@ -5,6 +5,7 @@ import 'package:flutter_pos_app/data/datasources/auth_local_datasource.dart';
 import 'package:flutter_pos_app/presentation/auth/pages/login_page.dart';
 import 'package:flutter_pos_app/presentation/home/bloc/logout/logout_bloc.dart';
 import 'package:flutter_pos_app/presentation/home/pages/home_page.dart';
+import 'package:flutter_pos_app/presentation/setting/pages/setting_pages.dart';
 
 import '../../../core/assets/assets.gen.dart';
 import '../../../core/constants/colors.dart';
@@ -25,7 +26,7 @@ class _DashboardPageState extends State<DashboardPage> {
     const HomePage(),
     const Center(child: Text('Orders'),),
     const Center(child: Text('History'),),
-    const Center(child: Text('Settings'),),
+    const SettingPage(),
     // const HomePage(),
     // const OrdersPage(),
     // const Placeholder(),
@@ -41,35 +42,6 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard"),
-        actions: [
-          BlocConsumer<LogoutBloc, LogoutState>(
-            listener: (context, state) {
-              state.maybeMap(
-                orElse: (){},
-                success: (_) {
-                  AuthLocalDatasource().removeAuthData();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage()
-                      )
-                  );
-                },
-              );
-            },
-            builder: (context, state) {
-              return IconButton(
-                onPressed: () {
-                  context.read<LogoutBloc>().add(const LogoutEvent.logout());
-                },
-                icon: const Icon(Icons.logout),
-              );
-            },
-          )
-        ],
-      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20.0),

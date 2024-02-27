@@ -9,7 +9,7 @@ class ProductRemoteDatasource {
   Future<Either<String, ProductResponseModel>> getProducts() async {
     final authData = await AuthLocalDatasource().getAuthData();
     final response = await http.get(
-      Uri.parse('${Variables.baseUrl}/appi/products'),
+      Uri.parse('${Variables.baseUrl}/api/products'),
       headers: {
         'Authorization': 'Bearer ${authData.token}',
       },
