@@ -2,9 +2,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pos_app/data/datasources/product_local_datasource.dart';
+import 'package:flutter_pos_app/data/models/request/add_product_request_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:flutter_pos_app/data/datasources/product_remote_datasource.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../data/models/response/product_response_model.dart';
 
@@ -25,7 +27,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         (l) => emit(_Error(l)), 
         (r) {
           products = r.data;
-          emit(_Success(r.data));
+          emit(_Success(products));
         }
       );
     });
@@ -47,6 +49,30 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           .toList();
 
       emit(_Success(newProducts));
+    });
+
+    on<_AddProduct>((event, emit) async {
+      emit(const _Loading());
+      final requestData = AddProductRequestModel(
+        name: event.product.name, 
+        price: event.product.price, 
+        stock: event.product.stock, 
+        category: event.product.category, 
+        isBestSeller: event.product.isBestSelller ? 1 : 0, 
+        image: event.image
+      );
+      final response = await _productRemoteDatasource.addProduct(requestData);
+      // products.add(newProduct);
+      response.fold(
+        (l) => emit(_Error(l)),
+        (r) {
+          products.add(r.data);
+          emit(_Success(
+            products
+          ));
+        }
+      );
+      emit(_Success(products));
     });
   }
 }

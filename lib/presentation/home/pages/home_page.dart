@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pos_app/presentation/home/bloc/checkout/checkout_bloc.dart';
 import 'package:flutter_pos_app/presentation/home/bloc/product/product_bloc.dart';
 
 import '../../../core/assets/assets.gen.dart';
@@ -160,6 +161,7 @@ class _HomePageState extends State<HomePage> {
                     return Center(child: Text(message),);
                   },
                   success: (products) {
+                    if (products.isEmpty) return const ProductEmpty();
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
